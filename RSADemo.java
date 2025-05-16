@@ -8,7 +8,7 @@ public class RSADemo {
     public static KeyPair generateKeyPair() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048); // Kunci 2048-bit
-        return generator.generateKeyPair();
+        return generator.generateKeyPair();2
     }
 
     // Method untuk mengenkripsi pesan

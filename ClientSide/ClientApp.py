@@ -13,8 +13,11 @@ while(True):
     else:
         break
 
-bigPrime1 = generateLargePrime(2048)
-bigPrime2 = generateLargePrime(2048)
+print("*****\nGenerating two new primes for you . . .")
+p = generateLargePrime(4056)
+q = generateLargePrime(4056)
+
+print("*****\n*****\nPrimes Generated!")
 
 results = requests.post(
     'http://127.0.0.1:5000/login',

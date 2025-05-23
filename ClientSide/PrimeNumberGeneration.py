@@ -1,11 +1,13 @@
 import random
-
+import sys
+import time
 
 #Source: https://www.geeksforgeeks.org/how-to-generate-large-prime-numbers-for-rsa-algorithm/
 #Other Source: https://youtu.be/tBzaMfV94uA?si=x5bLtPcC2Nl_2mg8
 def generateLargePrime(n : int) -> int:
     lowerLimit = 2**(n-1)+1
     upperLimit = 2**n-1
+    random.seed(time.time())
 
     lowerPrimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
                      31, 37, 41, 43, 47, 53, 59, 61, 67,
@@ -65,8 +67,8 @@ def generateLargePrime(n : int) -> int:
         if not isPrime:
             continue
         else:
-            print(number)
             return number
 
 if __name__ == '__main__':
-    generateLargePrime(2048)
+    x = generateLargePrime(4056)
+    print(sys.getsizeof(x))

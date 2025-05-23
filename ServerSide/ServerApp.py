@@ -7,7 +7,7 @@ app = Flask(__name__)
     Login details store list of tups
     (email, public_key)
 """
-loginDetails: list[tuple[str,int]] = []
+loginDetails: list[tuple[str,int , int]] = []
 
 @app.route('/' , methods=['GET'])
 def getHome():
@@ -16,7 +16,7 @@ def getHome():
 @app.route('/login/' , methods=['POST'])
 def postLoginDetails():
     data = json.loads(request.data)
-    if not (data["email"] or data["pubKey"]):
+    if not (data["email"] or data["n"] or data['e']):
         response = make_response(jsonify({'message':'LOGIN INCOMPLETE'}))
         response.headers.set('Content-Type', 'application/json')
         response.status_code = 422
@@ -25,11 +25,12 @@ def postLoginDetails():
     found = False
     for i in loginDetails:
         if data['email'] == i[0]:
-            i[1] = data['pubKey']
+            i[1] = data['e']
+            i[2] = data['n']
             found = True
     
     if not found :
-        loginDetails.append(data['email'],data['pubKey'])
+        loginDetails.append(data['email'],data['e'] , data['n'])
 
 
     response = make_response(jsonify({'mesage':'Login success'}))
@@ -39,7 +40,7 @@ def postLoginDetails():
 
 @app.route('/users/',methods=['GET'])
 def getUsers():
-    users = [{'name': i[0] , 'pubKey': i[1]} for i in loginDetails]
+    users = [{'name': i[0] , 'e': i[1] , 'n' : i[2]} for i in loginDetails]
     return jsonify({'users': users})
 
 app.run()

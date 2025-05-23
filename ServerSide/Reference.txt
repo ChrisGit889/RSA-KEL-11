@@ -1,0 +1,6 @@
+23-5-25
+
+https://www.geeksforgeeks.org/python-build-a-rest-api-using-flask/
+https://medium.com/@asvinjangid.kumar/creating-your-own-api-in-python-a-beginners-guide-59f4dd18d301
+https://pythonbasics.org/flask-rest-api/
+https://www.pythonlore.com/sending-responses-in-flask-with-response-objects/

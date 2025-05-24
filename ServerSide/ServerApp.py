@@ -9,6 +9,11 @@ app = Flask(__name__)
 """
 loginDetails: list[tuple[str,int , int]] = []
 
+"""
+    Messages stores send address and message
+"""
+messages : list[tuple[str,str]]= []
+
 @app.route('/' , methods=['GET'])
 def getHome():
     return jsonify({"message":'Hello. This is a trial message'})
@@ -30,7 +35,7 @@ def postLoginDetails():
             found = True
     
     if not found :
-        loginDetails.append(data['email'],data['e'] , data['n'])
+        loginDetails.append((data['email'],data['e'] , data['n']))
 
 
     response = make_response(jsonify({'mesage':'Login success'}))
@@ -40,7 +45,42 @@ def postLoginDetails():
 
 @app.route('/users/',methods=['GET'])
 def getUsers():
-    users = [{'name': i[0] , 'e': i[1] , 'n' : i[2]} for i in loginDetails]
+    users = [{'email': i[0] , 'e': i[1] , 'n' : i[2]} for i in loginDetails]
     return jsonify({'users': users})
+
+@app.route('/send/' , methods=['POST'])
+def postMessage():
+    data = json.loads(request.data)
+    if not (data['email']):
+        response = make_response(jsonify({'message':'Message not sent'}))
+        response.headers.set('Content-Type', 'application/json')
+        response.status_code = 422
+        return response
+    
+    messages.append((data['email'] , data['message']))
+    print(messages)
+    response = make_response(jsonify({'mesage':'Message sent'}))
+    response.headers.set('Content-Type', 'application/json')
+    response.status_code = 202
+    return response
+
+@app.route('/messages/<name>' , methods=['GET'])
+def getMessages(name):
+    if name not in [i[0] for i in messages]:
+        response = make_response(jsonify({'messages':[]}))
+        response.headers.set('Content-Type' , 'application/json')
+        response.status_code = 202
+        return response
+    
+    toSend = []
+    for i in messages:
+        if i[0] == name:
+            toSend.append(i[1])
+    
+    response = make_response(jsonify({'messages' : toSend}))
+    response.headers.set('Content-Type' , 'application/json')
+    response.status_code = 202
+    return response
+
 
 app.run()

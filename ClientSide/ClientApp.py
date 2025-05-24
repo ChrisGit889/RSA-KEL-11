@@ -1,8 +1,11 @@
 import requests
 import json
 import time
+import random
+import sys
 from PrimeNumberGeneration import generateLargePrime
 
+sys.setrecursionlimit(10000)
 print(chr(27) + "[2J")
 
 def gcd(a,b) -> int:
@@ -12,11 +15,47 @@ def gcd(a,b) -> int:
         a , b = b , a%b
     return a
 
-def get25LessThanN(n):
-    res = "25"
+#Extended Euclidean algorithm
+#Source: https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/
+x , y = 0 , 1
+def gcdExtended(a, b):
+    global x, y
+
+    # Base Case
+    if (a == 0):
+        x = 0
+        y = 1
+        return b
+
+    # To store results of recursive call
+    gc = gcdExtended(b % a, a)
+    x1 = x
+    y1 = y
+
+    # Update x and y using results of recursive
+    # call
+    x = y1 - (b // a) * x1
+    y = x1
+
+    return gc
+
+def modInverse(A, M):
+
+    g = gcdExtended(A, M)
+    if (g != 1):
+        print("Inverse doesn't exist")
+
+    else:
+
+        # m is added to handle negative x
+        res = (x % M + M) % M
+        return res
+
+def get65535LessThanN(n):
+    res = "65535"
     while int(res) < n :
-        res += "25"
-    return len(res) - 2
+        res += "65535"
+    return len(res) - 5
 
 def main():
     email = ''
@@ -31,8 +70,8 @@ def main():
             break
 
     print("*****\nGenerating two new primes for you . . .")
-    p = generateLargePrime(4056)
-    q = generateLargePrime(4056)
+    p = generateLargePrime(2048)
+    q = generateLargePrime(2048)
     bigPrime = p*q
     phi = (p-1)*(q-1)
     print("*****\n*****\nPrimes Generated!\n*****")
@@ -40,18 +79,15 @@ def main():
 
     #Source https://www.geeksforgeeks.org/rsa-algorithm-cryptography/
     e = 0
-    for i in range(2,phi):
+    while(True):
+        i = random.randrange(2,phi)
         if gcd(i,phi) == 1:
             e = i
             break
-
+    print('Public Key found!\nGenerating Private Key')
 
     #Inverse of e mod phi
-    d=0
-    for i in range(2,phi):
-        if (i*e)%phi == 1:
-            d = i
-            break
+    d= modInverse(e,phi)
 
     print("*****\n\nKeys successfully Created\n\n*****")
     results = requests.post(
@@ -76,37 +112,77 @@ def main():
         if x == 1:
             print(chr(27) + "[2J")
             print('Calling to the server for recieved messages. . .')
+            results = None
             while(True):
                 time.sleep(3)
-
                 #TODO: receiving logic
-                results = requests.get()
+                results = requests.get('http://127.0.0.1:5000/messages/'+email)
+                if results.status_code == 202:
+                    break
+
+            data = json.loads(results.content)['messages']
+            
+            partitionLength = get65535LessThanN(bigPrime)
+            
+            for text in data:
+                splitText = [text[i*partitionLength : i*partitionLength+partitionLength] for i in range(int(len(text)/partitionLength)+1)]
+                fullMessage = []
+                for partition in splitText:
+                    realMessage = str(pow(int(partition) , d , bigPrime)).rjust(partitionLength , '0')
+                    print(realMessage)
+                    fullMessage.append(realMessage)
+                fullMessage = ''.join(fullMessage)
+                fullMessage = ''.join([chr(int(fullMessage[i*5:i*5+5])) for i in range(int(len(fullMessage)/5)+1)])
+                print(fullMessage)
+            while(True): continue
+
         elif x == 2:
-            print('Querying for current users online')
             data = None
             chosen = None
             while(True):
+                print(chr(27) + "[2J")
+                print('Querying for current users online')
                 results = requests.get('http://127.0.0.1:5000/users')
                 data =json.loads(results.content)['users']
-                for i in len(data):
+                for i in range(len(data)):
                     print("["+str(i)+"] "+ data[i]['email'])
                 print('[-1] Refresh')
-
-                if int(input('\nInput : ')) == -1:
+                
+                c = int(input('\nInput : '))
+                if c <= -1 or c >= len(data):
                     continue
-                chosen = data[i]
+                chosen = data[c]
                 break
 
             directedEmail = chosen['email']
             usingE = chosen['e']
             usingN = chosen['n']
 
-            partitionLength = get25LessThanN(usingN)
+            partitionLength = get65535LessThanN(usingN)
 
             message = input('Put in your message:\n')
 
+            listedMessage = ''.join([str(ord(c)).rjust(5,'0') for c in message])
+
+            splitMessage = [listedMessage[i*partitionLength:i*partitionLength+partitionLength].ljust(partitionLength,'0') for i in range(int(len(listedMessage) / partitionLength) + 1)]
+
+            resultsList = []
+            for i in splitMessage :
+                resultsList.append(str(pow(int(i) , usingE , usingN)).rjust(partitionLength , '0'))
+            message = ''.join(resultsList)
+
+            requests.post(
+                'http://127.0.0.1:5000/send',
+                json ={
+                    'email' : directedEmail,
+                    'message' : message
+                }
+            )
 
 
 
 
-# main()
+
+
+
+main()

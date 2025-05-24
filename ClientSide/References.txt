@@ -2,3 +2,6 @@
 
 https://www.geeksforgeeks.org/how-to-generate-large-prime-numbers-for-rsa-algorithm/
 https://youtu.be/tBzaMfV94uA?si=x5bLtPcC2Nl_2mg8
+
+24-5-25
+https://www.geeksforgeeks.org/multiplicative-inverse-under-modulo-m/

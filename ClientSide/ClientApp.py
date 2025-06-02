@@ -88,6 +88,7 @@ def main():
 
     #Inverse of e mod phi
     d= modInverse(e,phi)
+    assert (d*e)%phi == 1
 
     print("*****\n\nKeys successfully Created\n\n*****")
     results = requests.post(
@@ -115,6 +116,7 @@ def main():
             results = None
             while(True):
                 time.sleep(3)
+                print('waiting')
                 #TODO: receiving logic
                 results = requests.get('http://127.0.0.1:5000/messages/'+email)
                 if results.status_code == 202:
@@ -122,17 +124,16 @@ def main():
 
             data = json.loads(results.content)['messages']
             
-            partitionLength = get65535LessThanN(bigPrime)
+            partitionLength = len(str(bigPrime))
             
             for text in data:
-                splitText = [text[i*partitionLength : i*partitionLength+partitionLength] for i in range(int(len(text)/partitionLength)+1)]
-                fullMessage = []
-                for partition in splitText:
-                    realMessage = str(pow(int(partition) , d , bigPrime)).rjust(partitionLength , '0')
-                    print(realMessage)
-                    fullMessage.append(realMessage)
+                splitText = [text[i*partitionLength : i*partitionLength+partitionLength] for i in range(int(len(text)/partitionLength))]
+                decrypted = [str(pow(int(num) , d , bigPrime)).rjust(partitionLength , '0') for num in splitText]
+                fullMessage = ''.join(decrypted)
+                fullMessage = [chr(int(fullMessage[i*5:i*5+5])) for i in range(int(len(fullMessage)/5))]
+                while fullMessage[-1] == '\x00' :
+                    fullMessage.pop()
                 fullMessage = ''.join(fullMessage)
-                fullMessage = ''.join([chr(int(fullMessage[i*5:i*5+5])) for i in range(int(len(fullMessage)/5)+1)])
                 print(fullMessage)
             while(True): continue
 
@@ -158,17 +159,16 @@ def main():
             usingE = chosen['e']
             usingN = chosen['n']
 
-            partitionLength = get65535LessThanN(usingN)
+            partitionLength = len(str(usingN))
 
             message = input('Put in your message:\n')
 
             listedMessage = ''.join([str(ord(c)).rjust(5,'0') for c in message])
 
-            splitMessage = [listedMessage[i*partitionLength:i*partitionLength+partitionLength].ljust(partitionLength,'0') for i in range(int(len(listedMessage) / partitionLength) + 1)]
+            splitMessage = [listedMessage[i*partitionLength:i*partitionLength+partitionLength] for i in range(int(len(listedMessage) / partitionLength) + 1)]
+            splitMessage[-1] = splitMessage[-1].ljust(partitionLength , '0')
 
-            resultsList = []
-            for i in splitMessage :
-                resultsList.append(str(pow(int(i) , usingE , usingN)).rjust(partitionLength , '0'))
+            resultsList = [str(pow(int(nums) , usingE , usingN)).rjust(partitionLength, '0') for nums in splitMessage]
             message = ''.join(resultsList)
 
             requests.post(

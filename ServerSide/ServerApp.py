@@ -69,7 +69,7 @@ def getMessages(name):
     if name not in [i[0] for i in messages]:
         response = make_response(jsonify({'messages':[]}))
         response.headers.set('Content-Type' , 'application/json')
-        response.status_code = 202
+        response.status_code = 203
         return response
     
     toSend = []

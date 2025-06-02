@@ -125,8 +125,12 @@ def main():
             data = json.loads(results.content)['messages']
             
             partitionLength = len(str(bigPrime))
+
+            print(chr(27) + "[2J")
+            print('\nMessages')
             
             for text in data:
+                print('message: ')
                 splitText = [text[i*partitionLength : i*partitionLength+partitionLength] for i in range(int(len(text)/partitionLength))]
                 decrypted = [str(pow(int(num) , d , bigPrime)).rjust(partitionLength , '0') for num in splitText]
                 fullMessage = ''.join(decrypted)
@@ -135,7 +139,7 @@ def main():
                     fullMessage.pop()
                 fullMessage = ''.join(fullMessage)
                 print(fullMessage)
-            while(True): continue
+            input('Press enter to close')
 
         elif x == 2:
             data = None

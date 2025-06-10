@@ -104,9 +104,13 @@ def main():
     while(True):
         print(chr(27) + "[2J")
         print('What would you like to do?')
-        print('1. Recieve a message')
-        print('2. Send a message')
-        x = int(input('Input: '))
+        print('[ 1 ]\tRecieve a message')
+        print('[ 2 ]\tSend a message')
+        print('[-1 ]\tClose')
+        try:
+            x = int(input('Input: '))
+        except :
+            continue
         
         print(chr(27) + "[2J")
 
@@ -182,6 +186,19 @@ def main():
                     'message' : message
                 }
             )
+        elif x == -1:
+            print(chr(27) + "[2J")
+            print('Closing App.')
+            time.sleep(1)
+            print(chr(27) + "[2J")
+            print('Closing App..')
+            time.sleep(1)
+            print(chr(27) + "[2J")
+            print('Closing App...')
+            time.sleep(1)
+            print(chr(27) + "[2J")
+
+            return;
 
 
 
